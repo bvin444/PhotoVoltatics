@@ -1,7 +1,9 @@
 import PySimpleGUI as sg
 import math as math
 from typing import ClassVar
+
 class Homework:
+    # TODO: figure out how to more seemlessly configure inputs as floats.
     x: ClassVar[int] = 450
     y: ClassVar[int] = 290
     def __init__(self):
