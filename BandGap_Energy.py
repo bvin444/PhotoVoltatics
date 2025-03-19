@@ -3,42 +3,34 @@ import math as math
 from typing import ClassVar
 
 class Homework:
-    # TODO: figure out how to more seemlessly configure inputs as floats.
     x: ClassVar[int] = 450
-    y: ClassVar[int] = 290
+    y: ClassVar[int] = 220
     def __init__(self):
         pass
     def main_loop(self):
         self.window = self.create_main_window()
         while True: 
-                event, values = self.window.read()
-                if event == "SUBMIT_5.1":
-                    if self.Input_Validation(values["PEAK_SUN_HOURS"], values["ENERGY_REQUIREMENT"], values["SYSTEM_EFFICIENCY"], values["OVER_SIZING_FACTOR"]): continue
-                    self.window["OUTPUT_5.1"].update(round((float(values["ENERGY_REQUIREMENT"])*(1+float(values["OVER_SIZING_FACTOR"]))/(float(values["PEAK_SUN_HOURS"])*float(values["SYSTEM_EFFICIENCY"]))),2))
-                elif event == "SUBMIT_5.2":
-                    if self.Input_Validation(values["ENERGY_REQUIREMENT_2"], values["STORAGE_REQUIREMENT"], values["INVERTER_EFFICIENCY"], values["DISCHARGE_RATE"], values["BATTERY_RATING"]): continue
-                    total_Energy = float(float(values["ENERGY_REQUIREMENT_2"]) * float(values["STORAGE_REQUIREMENT"]))
-                    total_Stored_Energy_Need = float(total_Energy / float(values["INVERTER_EFFICIENCY"]))
-                    Output = float(round(total_Stored_Energy_Need / (float(values["DISCHARGE_RATE"])*float(values["BATTERY_RATING"])), 2))
-                    self.window["OUTPUT_5.2"].update(math.ceil(Output))
-                elif event == "SUBMIT_5.3":
-                    if self.Input_Validation(values["REFRIGERATOR"], values["MICROWAVE_POWER"], values["MICROWAVE_TIME"], values["TV_POWER"], values["TV_TIME"], values["LAMP_POWER"], values["LAMP_TIME"], values["WELL_POWER"],
-                    values["WELL_TIME"], values["EFFICIENCY"], values["AVERAGE_SOLAR_IRRADIATION"], values["DERATED_FACTOR"]): continue
-                    Energy_Refrigerator = float(values['REFRIGERATOR']) 
-                    Energy_Microwave = float((float(values["MICROWAVE_POWER"]) * float(values["MICROWAVE_TIME"]) * 60) / 3600000) # (1000 J / s * 300 s) / 3600
-                    Energy_TV = float((float(values["TV_POWER"]) * float(values["TV_TIME"]) * 60) / 3600000) # Joules to kWh ->>> Joules / 3600\
-                    Energy_Lamp = float((float(values["LAMP_POWER"]) * float(values["LAMP_TIME"]) * 60) / 3600000) * float(values["LAMP_NUMBER"]) # Joules to kWh ->>> Joules / 3600
-                    Energy_Well = float((float(values["WELL_POWER"]) * float(values["WELL_TIME"]) * 60) / 3600000) # Joules to kWh ->>> Joules / 3600
-                    Total_Energy = Energy_Refrigerator + Energy_Microwave + Energy_TV + Energy_Lamp + Energy_Well
-                    PV_Module_Output = float((float(values["EFFICIENCY"])/100)*(float(values["AVERAGE_SOLAR_IRRADIATION"]))*(float(values["DERATED_FACTOR"]))) # how much energy I can produce with a single module
-                    self.window["OUTPUT_5.3_A"].update(f"{round(float(Total_Energy / PV_Module_Output), 2)} kWh")
-                    self.window["OUTPUT_5.3_B"].update(f"{round(float(Total_Energy / PV_Module_Output), 2)} m^2")
-                elif event == "SUBMIT_5.5":
-                    Power_Rating = float(values["VOLTAGE"])*float(values["AMP_HOURS"]) / 1000
-                    Energy_Demand = float(values["ENERGY_DEMAND_5.5"])
-                    Battery_Number = math.ceil((Energy_Demand**float(values["STORAGE_REQUIREMENT_5.5"])) / (Power_Rating*((float(values["DISCHARGE_RATE_5.5"])/100))))
-                    self.window["OUTPUT_5.5"].update(f"{Battery_Number}")
-                elif event == sg.WIN_CLOSED: break
+
+            event, values = self.window.read()
+            if event == "SUBMIT_5.1":
+                if self.Input_Validation("PEAK_SUN_HOURS", "ENERGY_REQUIREMENT", "SYSTEM_EFFICIENCY", "OVER_SIZING_FACTOR", values = values): continue
+                self.Chapter_5_Problem_1()
+
+            elif event == "SUBMIT_5.2":
+                if self.Input_Validation("ENERGY_REQUIREMENT_2", "STORAGE_REQUIREMENT", "INVERTER_EFFICIENCY", "DISCHARGE_RATE", "BATTERY_RATING"): continue
+                self.Chapter_5_Problem_2()
+                
+            elif event == "SUBMIT_5.3":
+                if self.Input_Validation("REFRIGERATOR", "MICROWAVE_POWER", "MICROWAVE_TIME", "TV_POWER", "TV_TIME", "LAMP_POWER", "LAMP_TIME", "WELL_POWER",
+                                        "WELL_TIME", "EFFICIENCY", "AVERAGE_SOLAR_IRRADIATION", "DERATED_FACTOR", values = values): continue
+                self.Chapter_5_Problem_3()
+
+            elif event == "SUBMIT_5.5":
+                # print(values])
+                if self.Input_Validation("STORAGE_REQUIREMENT_5.5", "VOLTAGE", "AMP_HOURS", "DISCHARGE_RATE_5.5", "ENERGY_DEMAND_5.5", values = values): continue
+                self.Chapter_5_Problem_5()
+            elif event == sg.WIN_CLOSED: break
+
         self.window.close()
     def create_main_window(self):
         Chapter_5_Problem_5 = sg.Frame("5.5", [
@@ -58,12 +50,9 @@ class Homework:
                         [sg.Text("How much power do the lamps use (W)?"), sg.Input("", key = "LAMP_POWER"), sg.Text("Length of use (min)?"), sg.Input("", key = "LAMP_TIME")],
                         [sg.Text("How many lamps do you have?"), sg.Input("", key = "LAMP_NUMBER")],
                         [sg.Text("How much power does the well use (W)?"), sg.Input("", key = "WELL_POWER"), sg.Text("Length of use (min)?"), sg.Input("", key = "WELL_TIME")],
-                        [sg.Text("What is the Average Solar Irradiation (kWh)?"), sg.Input("", key = "AVERAGE_SOLAR_IRRADIATION")],
-                        [sg.Text("What is the PV-Module Efficiency (%)?"), sg.Input("", key = "EFFICIENCY")],
-                        [sg.Text("What is your performance ratio (derated factor?"), sg.Input("", key = "DERATED_FACTOR")],
-                        [sg.Text("Power Rating:"), sg.Input("", key = "OUTPUT_5.3_A")],
-                        [sg.Text("Total Area needed:"), sg.Input("", key = "OUTPUT_5.3_B")],
+                        [sg.Text("What is the Average Solar Irradiation (kWh)?"), sg.Input("", key = "AVERAGE_SOLAR_IRRADIATION"), sg.Text("What is the PV-Module Efficiency (%)?"), sg.Input("", key = "EFFICIENCY"), sg.Text("What is your performance ratio (derated factor?"), sg.Input("", key = "DERATED_FACTOR")],
                         [sg.Button("Submit", key = "SUBMIT_5.3")],
+                        [sg.Text("Power Rating (output):"), sg.Input("", key = "OUTPUT_5.3_A"), sg.Text("Total Area needed (output):"), sg.Input("", key = "OUTPUT_5.3_B")],
                             ],
                         size = (1000, Homework.y), key = "5.3")
         Chapter_5_Problem_2 = sg.Frame("5.2", [
@@ -94,15 +83,47 @@ class Homework:
             [sg.Button("HW_4_Solutiions", key = "NONE")]
         ]
         layout = [[sg.TabGroup([[sg.Tab("Homework_5", HW_5), sg.Tab("Homework_4", HW_4)]])]]
-       
-
         return sg.Window("Homework_Analysis", layout, resizable = True)
-    def Input_Validation(self, *argv):
+    
+    def Chapter_5_Problem_1(self, values):
+        self.window["OUTPUT_5.1"].update(round((self.frame_values["ENERGY_REQUIREMENT"]*(1+self.frame_values["OVER_SIZING_FACTOR"])/(self.frame_values["PEAK_SUN_HOURS"]*self.frame_values["SYSTEM_EFFICIENCY"])),2))
+    
+    def Chapter_5_Problem_2(self, values):
+
+        total_Energy = self.frame_values["ENERGY_REQUIREMENT_2"] * self.frame_values["STORAGE_REQUIREMENT"]
+        total_Stored_Energy_Need = total_Energy / self.frame_values["INVERTER_EFFICIENCY"]
+        Output = round(total_Stored_Energy_Need / (self.frame_values["DISCHARGE_RATE"]*self.frame_values["BATTERY_RATING"]), 2)
+        self.window["OUTPUT_5.2"].update(math.ceil(Output))
+
+    def Chapter_5_Problem_3(self, values):
+    
+        Energy_Refrigerator = self.frame_values['REFRIGERATOR']
+        Energy_Microwave = (self.frame_values["MICROWAVE_POWER"] * self.frame_values["MICROWAVE_TIME"] * 60 / 3600000) # (1000 J / s * 300 s) / 3600
+        Energy_TV = (self.frame_values["TV_POWER"] * self.frame_values["TV_TIME"] * 60 / 3600000) # Joules to kWh ->>> Joules / 3600\
+        Energy_Lamp = (self.frame_values["LAMP_POWER"] * self.frame_values["LAMP_TIME"] * 60) / 3600000 * self.frame_values["LAMP_NUMBER"] # Joules to kWh ->>> Joules / 3600
+        Energy_Well = (self.frame_values["WELL_POWER"] * self.frame_values["WELL_TIME"] * 60) / 3600000 # Joules to kWh ->>> Joules / 3600
+        Total_Energy = Energy_Refrigerator + Energy_Microwave + Energy_TV + Energy_Lamp + Energy_Well
+        PV_Module_Output = (self.frame_values["EFFICIENCY"])/100*(self.frame_values["AVERAGE_SOLAR_IRRADIATION"])*(self.frame_values["DERATED_FACTOR"])# how much energy I can produce with a single module
+        self.window["OUTPUT_5.3_A"].update(f"{round(Total_Energy / PV_Module_Output, 2)} kWh")
+        self.window["OUTPUT_5.3_B"].update(f"{round(Total_Energy / PV_Module_Output, 2)} m^2")
+
+    def Chapter_5_Problem_5(self):
+        print(self.frame_values)
+        Power_Rating = (self.frame_values["VOLTAGE"]*self.frame_values["AMP_HOURS"]) / 1000 # Get kWh of battery
+        Energy_Demand = self.frame_values["ENERGY_DEMAND_5.5"] # Energy Demand (day)
+        Battery_Number = math.ceil((Energy_Demand*self.frame_values["STORAGE_REQUIREMENT_5.5"]) / (Power_Rating*(self.frame_values["DISCHARGE_RATE_5.5"])/100)) # (total energy need) / (power_rating times discharge_rate)
+        self.window["OUTPUT_5.5"].update(f"{Battery_Number}") # output answer to window
+
+    def Input_Validation(self, *argv, values):
         for value in argv:
             if value == '':
                 sg.popup("Input cannot be blank!", keep_on_top = True)
                 return True
+             # Get all input values from the Frame, and define as a float.
+        self.frame_values = {value : float(values[value]) for value in argv} # dictionary comprehension
+        print(self.frame_values)
         return False      
+
 
 if __name__ == "__main__":
      Home_Work_Solutions = Homework() # class instantiation
