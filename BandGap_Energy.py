@@ -17,7 +17,7 @@ class Homework:
                 self.Chapter_5_Problem_1()
 
             elif event == "SUBMIT_5.2":
-                if self.Input_Validation("ENERGY_REQUIREMENT_2", "STORAGE_REQUIREMENT", "INVERTER_EFFICIENCY", "DISCHARGE_RATE", "BATTERY_RATING"): continue
+                if self.Input_Validation("ENERGY_REQUIREMENT_2", "STORAGE_REQUIREMENT", "INVERTER_EFFICIENCY", "DISCHARGE_RATE", "BATTERY_RATING", values = values): continue
                 self.Chapter_5_Problem_2()
                 
             elif event == "SUBMIT_5.3":
@@ -116,7 +116,7 @@ class Homework:
 
     def Input_Validation(self, *argv, values):
         for value in argv:
-            if value == '':
+            if values[value] == '':
                 sg.popup("Input cannot be blank!", keep_on_top = True)
                 return True
              # Get all input values from the Frame, and define as a float.
