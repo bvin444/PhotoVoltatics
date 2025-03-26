@@ -29,6 +29,14 @@ class Homework:
                 # print(values])
                 if self.Input_Validation("STORAGE_REQUIREMENT_5.5", "VOLTAGE", "AMP_HOURS", "DISCHARGE_RATE_5.5", "ENERGY_DEMAND_5.5", values = values): continue
                 self.Chapter_5_Problem_5()
+            elif event == "SUBMIT_QUIZ_2.1":
+                # print(values])
+                if self.Input_Validation("MODULE_EFFICIENCY_QUIZ_2_P1", "SOLAR_IRRADIATION_QUIZ_2_P1", "MODULE_AREA_QUIZ_2_P1", "SYSTEM_LOSS_QUIZ_2_P1", values = values): continue
+                self.Quiz_2_Problem_1()
+            elif event == "SUBMIT_QUIZ_2.2":
+                # print(values])
+                if self.Input_Validation("SOLAR_IRRADIATION_QUIZ_2_P2", "INVERTER_EFFICIENCY_QUIZ_2_P2", "DESIRED_ENERGY_PRODUCTION_QUIZ_2_P2", values = values): continue
+                self.Quiz_2_Problem_2()
             elif event == sg.WIN_CLOSED: break
 
         self.window.close()
@@ -74,18 +82,39 @@ class Homework:
                         [sg.Text("Output (kWh):"), sg.Input("", key = "OUTPUT_5.1")]
                             ],
                         size = (Homework.x, Homework.y), key = "5.1")
+
+        QUIZ_2_Problem_1 = sg.Frame("Quiz 2 Problem 1", [
+            [sg.Text("What is your PV module's efficiency? (%): "), sg.Input("", key = "MODULE_EFFICIENCY_QUIZ_2_P1")],
+            [sg.Text("What is your solar irradiation?: "), sg.Input("", key = "SOLAR_IRRADIATION_QUIZ_2_P1")],
+            [sg.Text("What is your module area? (m^2): "), sg.Input("", key = "MODULE_AREA_QUIZ_2_P1")],
+            [sg.Text("What is your total loss? (%): "), sg.Input("", key = "SYSTEM_LOSS_QUIZ_2_P1")],
+            [sg.Button("Submit", key = "SUBMIT_QUIZ_2.1")],
+            [sg.Text("Output:"), sg.Input("", key = "OUTPUT_QUIZ_2.1")]
+        ], size = (Homework.x, Homework.y), key = "Quiz_2_Problem_1")
+        
+        QUIZ_2_Problem_2 = sg.Frame("Quiz 2 Problem 2" , [
+            [sg.Text("What is inverter_Efficiency (%): "), sg.Input("", key = "INVERTER_EFFICIENCY_QUIZ_2_P2")],
+            [sg.Text("What is your solar irradiation? (kWh / m^2 / yr): "), sg.Input("", key = "SOLAR_IRRADIATION_QUIZ_2_P2")],
+            [sg.Text("What is your desired energy production? (kWh): "), sg.Input("", key = "DESIRED_ENERGY_PRODUCTION_QUIZ_2_P2")],
+            [sg.Button("Submit", key = "SUBMIT_QUIZ_2.2")],
+            [sg.Text("Output (kWh):"), sg.Input("", key = "OUTPUT_QUIZ_2.2")]
+        ], size = (Homework.x, Homework.y), key = "Quiz_2_Problem_2")
+
         HW_5 = [
             [Chapter_5_Problem_1, Chapter_5_Problem_2],
             [Chapter_5_Problem_3],
             [Chapter_5_Problem_5]
         ]
-        HW_4 = [
-            [sg.Button("HW_4_Solutiions", key = "NONE")]
+
+        QUIZ_2 = [
+            [QUIZ_2_Problem_1, QUIZ_2_Problem_2],
         ]
-        layout = [[sg.TabGroup([[sg.Tab("Homework_5", HW_5), sg.Tab("Homework_4", HW_4)]])]]
+        
+        layout = [[sg.TabGroup([[sg.Tab("Homework_5", HW_5), sg.Tab("Quiz_2", QUIZ_2)]])]]
         return sg.Window("Homework_Analysis", layout, resizable = True)
     
     def Chapter_5_Problem_1(self, values):
+
         self.window["OUTPUT_5.1"].update(round((self.frame_values["ENERGY_REQUIREMENT"]*(1+self.frame_values["OVER_SIZING_FACTOR"])/(self.frame_values["PEAK_SUN_HOURS"]*self.frame_values["SYSTEM_EFFICIENCY"])),2))
     
     def Chapter_5_Problem_2(self, values):
@@ -108,24 +137,47 @@ class Homework:
         self.window["OUTPUT_5.3_B"].update(f"{round(Total_Energy / PV_Module_Output, 2)} m^2")
 
     def Chapter_5_Problem_5(self):
+
         print(self.frame_values)
         Power_Rating = (self.frame_values["VOLTAGE"]*self.frame_values["AMP_HOURS"]) / 1000 # Get kWh of battery
         Energy_Demand = self.frame_values["ENERGY_DEMAND_5.5"] # Energy Demand (day)
         Battery_Number = math.ceil((Energy_Demand*self.frame_values["STORAGE_REQUIREMENT_5.5"]) / (Power_Rating*(self.frame_values["DISCHARGE_RATE_5.5"])/100)) # (total energy need) / (power_rating times discharge_rate)
         self.window["OUTPUT_5.5"].update(f"{Battery_Number}") # output answer to window
 
+    def Quiz_2_Problem_1(self):  
+
+        module_Efficiency = self.frame_values["MODULE_EFFICIENCY_QUIZ_2_P1"] / 100
+        solar_Irradiation = self.frame_values["SOLAR_IRRADIATION_QUIZ_2_P1"]
+        module_Area = self.frame_values["MODULE_AREA_QUIZ_2_P1"]
+        system_Loss = (100 - self.frame_values["SYSTEM_LOSS_QUIZ_2_P1"]) / 100
+        specific_Yield = module_Efficiency * solar_Irradiation
+        annual_Energy_Production = specific_Yield * module_Area
+        net_Energy_Production = annual_Energy_Production * system_Loss
+        self.window["OUTPUT_QUIZ_2.1"].update(f"{net_Energy_Production}") # output answer to window
+    
+    def Quiz_2_Problem_2(self):  
+
+        desired_Energy = self.frame_values["DESIRED_ENERGY_PRODUCTION_QUIZ_2_P2"]
+        solar_Irradiation = self.frame_values["SOLAR_IRRADIATION_QUIZ_2_P2"]
+        inverter_Efficiency = self.frame_values["INVERTER_EFFICIENCY_QUIZ_2_P2"] / 100
+        self.window["OUTPUT_QUIZ_2.2"].update(round(desired_Energy/(solar_Irradiation*inverter_Efficiency), 2))
+
     def Input_Validation(self, *argv, values):
+
         for value in argv:
             if values[value] == '':
                 sg.popup("Input cannot be blank!", keep_on_top = True)
                 return True
-             # Get all input values from the Frame, and define as a float.
+            try:
+                float(values[value])
+            except:
+                print(value)
+                sg.popup("Input must a numerical value")
+                return True
         self.frame_values = {value : float(values[value]) for value in argv} # dictionary comprehension
         print(self.frame_values)
         return False      
 
-
 if __name__ == "__main__":
      Home_Work_Solutions = Homework() # class instantiation
      Home_Work_Solutions.main_loop()
-# For work, let us code up solutions to homework problems 5.1, 5.2, 5.3, 5.4
